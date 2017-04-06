@@ -4,7 +4,7 @@ int main(int argc, char **argv){
 	Network ANN;
 	
 	if(argc < 3){
-		std::cout << "usage: [1]I/O Vector File [2]Weights File" << std::endl;
+		std::cout << "usage: [I/O Vector File] [Weights File]" << std::endl;
 		return -1;
 	}
 	
@@ -17,6 +17,11 @@ int main(int argc, char **argv){
 		std::cout << "Failed to load input weights file " << argv[2] << std::endl;
 		return -1;
 	}
+	
+	ANN.PrintInputVectors();
+	ANN.PrintOutputVectors();
+	ANN.PrintWeights();
+	ANN.PrintNetworkInfo();
 	
 	return 1;
 }
