@@ -1,23 +1,21 @@
-CC = g++
-C_FLAGS = -g -Wall
+CC = cl
+TARGET = NeuralNetwork.exe
 SRC_PATH = src/
 BIN_PATH = bin/
-TARGET = NeuralNetwork
+	
+all: $(TARGET)
 
-all:$(TARGET)
+$(TARGET): NeuralNetwork.obj
+	$(CC) /o $(TARGET) $(BIN_PATH)Neuron.obj $(BIN_PATH)Network.obj $(BIN_PATH)NeuralNetwork.obj
+	
+NeuralNetwork.obj: Network.obj Neuron.obj
+	$(CC) /EHsc /Fo.\bin\ /c $(SRC_PATH)NeuralNetwork.cpp
+	
+Network.obj: $(SRC_PATH)Network.cpp $(SRC_PATH)Network.h
+	$(CC) /EHsc /Fo.\bin\ /c $(SRC_PATH)Network.cpp 
+	
+Neuron.obj: $(SRC_PATH)Neuron.cpp $(SRC_PATH)Neuron.h
+	$(CC) /EHsc /Fo.\bin\ /c $(SRC_PATH)Neuron.cpp
+	
+	
 
-$(TARGET): Network.o $(TARGET).o
-	$(CC) -o $(TARGET) $(BIN_PATH)$(TARGET).o $(BIN_PATH)Network.o $(BIN_PATH)Neuron.o
-	
-$(TARGET).o: $(SRC_PATH)$(TARGET).cpp
-	$(CC) -c $(SRC_PATH)$(TARGET).cpp -o $(BIN_PATH)$(TARGET).o
-	
-Network.o: Neuron.o $(SRC_PATH)Network.cpp $(SRC_PATH)Network.h
-	$(CC) -c $(SRC_PATH)Network.cpp -o $(BIN_PATH)Network.o
-		
-Neuron.o: $(SRC_PATH)Neuron.cpp $(SRC_PATH)Neuron.h
-	$(CC) -c $(SRC_PATH)Neuron.cpp -o $(BIN_PATH)Neuron.o
-	
-clean:
-	rm $(BIN_PATH)*.o
-	rm *.exe
