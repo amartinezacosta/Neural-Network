@@ -18,10 +18,15 @@ int main(int argc, char **argv){
 		return -1;
 	}
 	
+	ANN.PrintNetworkInfo();
 	ANN.PrintInputVectors();
 	ANN.PrintOutputVectors();
 	ANN.PrintWeights();
-	ANN.PrintNetworkInfo();
 	
+	for (int i = 0; i < ANN.GetTrainingSamplesCount(); i++){
+		std::cout << "FeedForward Output " << i + 1 << ": ";
+		std::cout << ANN.FeedForward(i) << std::endl;
+	}
+		
 	return 1;
 }
