@@ -13,30 +13,37 @@ Network::~Network(){
 
 }
 
-float Network::FeedForward(int sample_index){
+std::vector<float> Network::FeedForward(int sample_index){
 	/*iterate over every neuron in the hidden layer compute the sum of weighted inputs
 	and apply the activation function*/
-	float output;
+	float temp_output;
 	std::vector<float> hlayer_outputs;
+	std::vector<float> outputs;
 	
+	/*Hidden Layer feedforward and activation for all the neurons*/
 	for(int i = 0; i < _HiddenNeuronCount; i++){
 		HiddenLayer[i].AddWeigthedInputs(InputVectors[sample_index]);
-		output = HiddenLayer[i].ApplyActivationFunction();
-		hlayer_outputs.push_back(output);
+		temp_output = HiddenLayer[i].ApplyActivationFunction();
+		hlayer_outputs.push_back(temp_output);
 	}
 	
 	/*rest of the neurons should be at the output layer*/
-	for(int i = _HiddenNeuronCount; i < _NeuronCount; i++){
-		HiddenLayer[i].AddWeigthedInputs(hlayer_outputs);
-		output = HiddenLayer[i].ApplyActivationFunction();
+	for(int i = 0; i < _OutputVectorSize; i++){
+		OutputLayer[i].AddWeigthedInputs(hlayer_outputs);
+		temp_output = OutputLayer[i].ApplyActivationFunction();
+		outputs.push_back(temp_output);
 	}
 	
 	/*This should be a vector*/
-	return output;
+	return outputs;
 }
 
 int Network::GetTrainingSamplesCount(void){
 	return _TrainingSamplesCount;
+}
+
+int Network::GetOutputVectorSize(void){
+	return _OutputVectorSize;
 }
 
 void Network::PrintNetworkInfo(void){
@@ -45,14 +52,21 @@ void Network::PrintNetworkInfo(void){
 	std::cout << "Trainig Sample Count: " << _TrainingSamplesCount << std::endl;
 	std::cout << "Targets Count: " << _TargetsCount << std::endl;
 	std::cout << "Neuron Count: " << _NeuronCount << std::endl;
+	std::cout << "Neuron Count in Hidden Layer: " << _HiddenNeuronCount << std::endl;
 	std::cout << "\n\n";
 	
 }
 
 void Network::PrintWeights(void){
-	std::cout << "Weights" << std::endl;
-	for(int i = 0; i < Weights.size(); i++){
-		std::cout << std::fixed << Weights[i] << std::endl; 
+	std::vector< std:: vector<float> >::const_iterator row;
+	std::vector<float>::const_iterator col;
+	int i = 0;
+	
+	for(row = Weights.begin(); row != Weights.end(); ++row){
+		std::cout << "Weights Set " << i++ << std::endl;
+		for(col = row->begin(); col != row->end(); ++col){
+			std::cout << *col << std::endl;
+		}
 	}
 	
 	std::cout << "\n\n";
@@ -85,7 +99,6 @@ int Network::LoadIOFile(char *file){
 	std::string line;
 	std::stringstream ss;
 	float vector_entry;
-	std::vector<float> IOVector;
 	
 	if(!IOfile){
 		return 0;
@@ -135,7 +148,7 @@ int Network::LoadWeightsFile(char *file){
 	std::string line;
 	std::stringstream ss;
 	float vector_entry;
-	std::vector<float> neuron_weights;
+	std::vector<float> temp_weights;
 	
 	if(!IOfile){
 		return 0;
@@ -148,20 +161,32 @@ int Network::LoadWeightsFile(char *file){
 		ss << line;
 		
 		while(ss >> vector_entry){
-			Weights.push_back(vector_entry);
-			neuron_weights.push_back(vector_entry);
+			temp_weights.push_back(vector_entry);
 		}
 		
-		/*Resize hidden layer neuron vector and reset neuron weights vector size*/
-		_NeuronCount++;
-		HiddenLayer.resize(_NeuronCount);
-		HiddenLayer[_NeuronCount - 1].SetWeights(neuron_weights);
-		neuron_weights.resize(0);
+		Weights.push_back(temp_weights);
+		temp_weights.resize(0);
 	}
 	
-	/*Hidden Neurons is equal to the neuron count minus the ouput vector size 
-	(how many outputs we have at the last layer)*/
+	/*Neuron count is just the size of the weights vector.
+	The hidden neuron count is given by the number of neurons
+	minus the size of the output vector size*/
+	_NeuronCount = Weights.size();
 	_HiddenNeuronCount = _NeuronCount - _OutputVectorSize;
+	
+	/*Set size of hiden layer and output layer*/
+	HiddenLayer.resize(_HiddenNeuronCount);
+	OutputLayer.resize(_OutputVectorSize);
+	
+	/*Set weights for hidden layer neurons and output layer 
+	neurons*/
+	for(int i = 0; i < _HiddenNeuronCount; i++){
+		HiddenLayer[i].SetWeights(Weights[i]);
+	}
+	
+	for(int i = 0; i < _OutputVectorSize; i++){
+		OutputLayer[i].SetWeights(Weights[i +_HiddenNeuronCount]);
+	}
 	
 	return 1;
 }

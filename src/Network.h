@@ -13,15 +13,15 @@ public:
 	
 	int LoadIOFile(char *file);
 	int LoadWeightsFile(char *file);
-	float FeedForward(int sample_index);
+	std::vector<float> FeedForward(int sample_index);
 	
 	void PrintWeights(void);
 	void PrintInputVectors(void);
 	void PrintOutputVectors(void);
 	void PrintNetworkInfo(void);
 	
-	
 	int GetTrainingSamplesCount(void);
+	int GetOutputVectorSize(void);
 	
 private:
 	int _InputVectorSize;
@@ -33,7 +33,8 @@ private:
 	
 	std::vector< std::vector<float> > InputVectors;
 	std::vector< std::vector<float> > OutputVectors;
-	std::vector<float> Weights;
+	std::vector< std::vector<float> > Weights;
 	
 	std::vector<Neuron> HiddenLayer;
+	std::vector<Neuron> OutputLayer;
 };
